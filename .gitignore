@@ -1,0 +1,11 @@
+app/build/
+app/keystore.jks
+
+# генерируется modpost при сборке, случайно попал в src/ через wildcard-копирование
+# из прежнего каталога сборки — не удаляю сам, см. сообщение в чате
+modules/src/usbserial/usbserialmerged2.mod.c
+modules/**/*.o
+modules/**/*.mod
+modules/**/*.mod.c
+modules/**/.*.cmd
+modules/**/modules.order
