@@ -1,7 +1,9 @@
 package su.dsr.f515wwan;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -19,6 +21,8 @@ import android.widget.TextView;
  * argument sets. Nothing runs automatically: only on button press.
  */
 public class MainActivity extends Activity {
+
+    private static final String SPEEDTEST_URL = "https://internet.yandex.ru";
 
     private TextView log;
     private LinearLayout buttonsRow;
@@ -45,6 +49,7 @@ public class MainActivity extends Activity {
         addRunButton("Проверка", "--check");
         addRunButton("Включить", "--system");
         addRunButton("Выключить", "--down");
+        addUrlButton("Интернетометр", SPEEDTEST_URL);
         ScrollView buttonsScroll = new ScrollView(this);
         buttonsScroll.setHorizontalScrollBarEnabled(false);
         buttonsScroll.addView(buttonsRow);
@@ -64,9 +69,10 @@ public class MainActivity extends Activity {
         append("ready. adbd target " + Keeper.ADB_HOST + ":" + Keeper.ADB_PORT);
         append("ничего не запускается само - только по кнопке.");
         append("");
-        append("Проверка  - только диагностика, ничего не меняет");
-        append("Включить  - поднять модем/PPP и раздать интернет приложениям Android");
-        append("Выключить - остановить pppd");
+        append("Проверка      - только диагностика, ничего не меняет");
+        append("Включить      - поднять модем/PPP и раздать интернет приложениям Android");
+        append("Выключить     - остановить pppd");
+        append("Интернетометр - открыть " + SPEEDTEST_URL + " (проверка интернета глазами)");
     }
 
     private void addRunButton(String text, final String args) {
@@ -94,6 +100,25 @@ public class MainActivity extends Activity {
                         });
                     }
                 });
+            }
+        }));
+    }
+
+    /**
+     * Открывает URL системным обработчиком ACTION_VIEW - тем же самым способом, которым
+     * это уже проверено вручную (`am start -a android.intent.action.VIEW -d URL`), а не
+     * через свой WebView: на этой прошивке уже есть готовый webview-просмотрщик, поднимать
+     * второй смысла нет.
+     */
+    private void addUrlButton(String text, final String url) {
+        buttonsRow.addView(button(text, new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                } catch (Exception e) {
+                    append("не удалось открыть " + url + ": " + e);
+                }
             }
         }));
     }
