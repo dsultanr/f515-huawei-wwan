@@ -11,12 +11,17 @@ APK=$PROJ/F515WwanApp.apk
 
 mkdir -p "$OUT/classes"
 mkdir -p "$OUT/dex"
+mkdir -p "$OUT/res-compiled"
 
-echo "== aapt2 link (manifest + assets)"
+echo "== aapt2 compile (res)"
+"$BT/aapt2" compile --dir "$PROJ/res" -o "$OUT/res-compiled"
+
+echo "== aapt2 link (manifest + assets + res)"
 "$BT/aapt2" link \
     --manifest "$PROJ/AndroidManifest.xml" \
     -I "$PLATFORM" \
     -A "$PROJ/assets" \
+    -R "$OUT"/res-compiled/*.flat \
     --min-sdk-version 26 --target-sdk-version 29 \
     -o "$OUT/base.apk"
 
