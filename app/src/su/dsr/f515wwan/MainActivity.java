@@ -42,22 +42,9 @@ public class MainActivity extends Activity {
 
         buttonsRow = new LinearLayout(this);
         buttonsRow.setOrientation(LinearLayout.HORIZONTAL);
-        addRunButton("Check", "--check");
-        addRunButton("Bring up", "");
-        addRunButton("+ Apps", "--system");
-        addRunButton("Down", "--down");
-        addPlainButton("Status", new Runnable() {
-            @Override
-            public void run() {
-                post(Keeper.status(MainActivity.this));
-            }
-        });
-        addPlainButton("Log", new Runnable() {
-            @Override
-            public void run() {
-                post(Keeper.readLog(MainActivity.this, 60));
-            }
-        });
+        addRunButton("Проверка", "--check");
+        addRunButton("Включить", "--system");
+        addRunButton("Выключить", "--down");
         ScrollView buttonsScroll = new ScrollView(this);
         buttonsScroll.setHorizontalScrollBarEnabled(false);
         buttonsScroll.addView(buttonsRow);
@@ -77,10 +64,9 @@ public class MainActivity extends Activity {
         append("ready. adbd target " + Keeper.ADB_HOST + ":" + Keeper.ADB_PORT);
         append("ничего не запускается само - только по кнопке.");
         append("");
-        append("Check    - только диагностика, ничего не меняет");
-        append("Bring up - поднять модем/PPP (root/adb сессия)");
-        append("+ Apps   - плюс маршрутизация трафика приложений Android");
-        append("Down     - остановить pppd");
+        append("Проверка  - только диагностика, ничего не меняет");
+        append("Включить  - поднять модем/PPP и раздать интернет приложениям Android");
+        append("Выключить - остановить pppd");
     }
 
     private void addRunButton(String text, final String args) {
@@ -106,31 +92,6 @@ public class MainActivity extends Activity {
                                 setBusy(false);
                             }
                         });
-                    }
-                });
-            }
-        }));
-    }
-
-    private void addPlainButton(String text, final Runnable action) {
-        buttonsRow.addView(button(text, new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (busy) return;
-                setBusy(true);
-                background(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            action.run();
-                        } finally {
-                            ui.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    setBusy(false);
-                                }
-                            });
-                        }
                     }
                 });
             }

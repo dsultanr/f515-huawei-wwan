@@ -16,7 +16,6 @@ public class Keeper {
 
     static final String DIR = "/data/local/tmp/wwan";
     static final String SCRIPT = DIR + "/wwan-up.sh";
-    static final String LOG = DIR + "/wwan.log";
     static final String ADB_HOST = "127.0.0.1";
     static final int ADB_PORT = 5555;
 
@@ -64,48 +63,6 @@ public class Keeper {
                 if (adb != null) adb.close();
             }
             return sb.toString();
-        }
-    }
-
-    public static String readLog(Context ctx, int tailLines) {
-        AdbClient adb = null;
-        try {
-            adb = connect(ctx, 15000);
-            return adb.shell("tail -n " + tailLines + " " + LOG + " 2>&1");
-        } catch (Exception e) {
-            return "read failed: " + e;
-        } finally {
-            if (adb != null) adb.close();
-        }
-    }
-
-    /** Snapshot of current state, independent of running the script (no side effects). */
-    public static String status(Context ctx) {
-        AdbClient adb = null;
-        try {
-            adb = connect(ctx, 20000);
-            StringBuilder sb = new StringBuilder();
-            sb.append("--- usb ---\n").append(adb.shell(
-                    "for d in /sys/bus/usb/devices/*; do [ -f $d/idVendor ] && "
-                            + "[ \"$(cat $d/idVendor)\" = 12d1 ] && echo \"$(basename $d): "
-                            + "$(cat $d/idVendor):$(cat $d/idProduct)\"; done")).append('\n');
-            sb.append("--- modules ---\n")
-                    .append(adb.shell("lsmod | grep -E 'usbserialmerged2|ppp_async' || echo 'не загружены'"))
-                    .append('\n');
-            sb.append("--- ports ---\n").append(adb.shell("ls -1 /dev/ttyUSB* 2>&1")).append('\n');
-            sb.append("--- ppp0 ---\n")
-                    .append(adb.shell("ip -4 -o addr show ppp0 2>&1 || echo 'не поднят'"))
-                    .append('\n');
-            sb.append("--- pppd ---\n").append(adb.shell("pidof pppd || echo 'не запущен'")).append('\n');
-            sb.append("--- сеть приложений (Tbox) ---\n").append(adb.shell(
-                    "dumpsys connectivity 2>/dev/null | grep -m1 'type: Tbox' | "
-                            + "grep -oE 'everValidated\\{[a-z]*\\}|Score\\{[0-9]*\\}' | tr '\\n' ' '"))
-                    .append('\n');
-            return sb.toString();
-        } catch (Exception e) {
-            return "status failed: " + e;
-        } finally {
-            if (adb != null) adb.close();
         }
     }
 
